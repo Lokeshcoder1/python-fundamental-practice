@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 
 class Contact:
     def __init__(self,name,phone,email=''):
@@ -26,21 +27,21 @@ class ContactBook:
     def add_contact(self,name,phone,email=''):
         contact=Contact(name,phone,email)
         self.contacts.append(contact)
-        return f"Contact Added successfully in the contact book!"
+        return True
 
     def del_contact(self,name):
         for i,contact in enumerate(self.contacts):
             if contact.name.lower()==name.lower():
                 del self.contacts[i]
                 return True
-            return None
+        return False
 
     def search_contact(self,name):
         for contact in self.contacts:
             if contact.name.lower()==name:
                 print(contact)
                 return True
-            return None
+        return False
 
     def list_all_contacts(self):
         for contact in self.contacts:
@@ -49,12 +50,16 @@ class ContactBook:
 
 class FileStorage:
     def __init__(self,filename='contactbook.json'):
-        self.filename=filename
+        self.filename=Path(filename)
 
     def save_to_file(self,cb):
         data=[con.to_dict() for con in cb.contacts]
-        with open(self.filename,'w') as f:
-            json.dump(data,f,indent=2)
+        try:
+            with open(self.filename,'w') as f:
+                json.dump(data,f,indent=2)
+        except IOError as e:
+            print(f'Error to file save {e}')
+            raise
 
     def load_from_file(self):
         try:
