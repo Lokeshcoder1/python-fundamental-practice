@@ -1,28 +1,16 @@
 import json
 from pathlib import Path
+from dataclasses import dataclass,asdict
 
+@dataclass
 class Contact:
-    def __init__(self,name,phone,email=''):
-        self.name=name
-        self.phone=phone
-        self.email=email
-
-    def __str__(self):
-        return f"name :{self.name}\ncontact :{self.phone}\nemail :{self.email}"
-
-    def to_dict(self):
-        return {'name':self.name,
-                'phone':self.phone,
-                'email':self.email}
-
-    @classmethod
-    def from_dict(cls,data):
-        contact=cls(data['name'],data['phone'],data['email'])
-        return contact
+    name:str
+    phone:str
+    email:str =''
 
 class ContactBook:
-    def __init__(self,contacts=None):
-        self.contacts=contacts if contacts is not None else []
+    def __init__(self):
+        self.contacts=[]
 
     def add_contact(self,name,phone,email=''):
         contact=Contact(name,phone,email)
@@ -39,46 +27,39 @@ class ContactBook:
     def search_contact(self,name):
         for contact in self.contacts:
             if contact.name.lower()==name:
-                print(contact)
-                return True
-        return False
+                return contact
+        return None
 
     def list_all_contacts(self):
         for contact in self.contacts:
-            print(contact)
+            print(f'    Contact of {contact.name}\nName :{contact.name}\nPhone No: {contact.phone}\nEmail ID : {contact.email}')
             print()
 
-class FileStorage:
-    def __init__(self,filename='contactbook.json'):
-        self.filename=Path(filename)
-
-    def save_to_file(self,cb):
-        data=[con.to_dict() for con in cb.contacts]
+    def save_to_file(self,filename:str='contactbook.json'):
+        data=[asdict(contact) for contact in self.contacts]
         try:
-            with open(self.filename,'w') as f:
+            with open(filename,'w') as f:
                 json.dump(data,f,indent=2)
-        except IOError as e:
-            print(f'Error to file save {e}')
-            raise
+        except IOError:
+            return"Error occured"
 
-    def load_from_file(self):
+    def load_from_file(self,filename:str='contactbook.json'):
+        filepath=Path(filename)
         try:
-            with open(self.filename,'r') as f :
+            with open(filepath,'r')as f:
                 data=json.load(f)
-            return  [Contact.from_dict(item) for item in data]
-        except FileNotFoundError:
+            self.contacts=[Contact(**item) for item in data ]
+        except(json.JSONDecodeError,IOError):
             return []
 
-
-
 if __name__=='__main__':
-    storage=FileStorage()
-    loaded_contacts=storage.load_from_file()
-    cb=ContactBook(loaded_contacts)
+    cb=ContactBook()
+    cb.load_from_file()
+
 
     while True:
         print('    CONTACT BOOK')
-        print('1.Add contact\n2.Remove contact\n3.search contact\n4.List of the all the contacts')
+        print('1.Add contact\n2.Remove contact\n3.search contact\n4.List of the all the contacts\n5.To exit')
         command=int(input("Enter the options : "))
 
         if command==1:
@@ -86,11 +67,11 @@ if __name__=='__main__':
             phone=input('Enter mobile no : ')
             email=input('Enter email : ')
             cb.add_contact(name,phone,email)
-            storage.save_to_file(cb)
+            cb.save_to_file()
         elif command==2:
             name=input('Enter name to del : ')
             cb.del_contact(name)
-            storage.save_to_file(cb)
+            cb.save_to_file()
         elif command==3:
             name=input('Enter name to search : ')
             print(cb.search_contact(name))
@@ -98,7 +79,7 @@ if __name__=='__main__':
                 cb.list_all_contacts()
         elif command==5:
             print('Thank you for visiting!')
-            storage.save_to_file(cb)
+            cb.save_to_file()
             break
 
 
