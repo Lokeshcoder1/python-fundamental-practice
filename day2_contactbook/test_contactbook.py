@@ -1,42 +1,49 @@
 from contactbook import ContactBook
+
+
 def test_search_existing():
-    cb=ContactBook()
-    cb.add_contact('lokesh','9989370804','lokesh@gmail.com')
-    assert cb.search_contact('lokesh') is not None
+    cb = ContactBook()
+    cb.add_contact("lokesh", "9989370804", "lokesh@gmail.com")
+    assert cb.search_contact("lokesh") is not None
+
 
 def test_search_non_existing():
-    cb=ContactBook()
-    assert cb.search_contact('ajay') is None
+    cb = ContactBook()
+    assert cb.search_contact("ajay") is None
 
-def test_remove_existing():
-    cb=ContactBook()
-    cb.add_contact('ajay','9550929777','ajay@gmail.com')
-    cb.del_contact('ajay')
-    assert cb.search_contact('ajay') is None
+    def test_remove_existing():
+        cb = ContactBook()
+        cb.add_contact("ajay", "9550929777", "ajay@gmail.com")
+        cb.del_contact("ajay")
+        assert cb.search_contact("ajay") is None
+
 
 def test_remove_non_existing():
-    cb=ContactBook()
-    assert cb.del_contact('ajay') is False
+    cb = ContactBook()
+    assert cb.del_contact("ajay") is False
+
 
 def test_del_from_empty_list():
     cb = ContactBook()
     cb.contacts.clear()
-    result = cb.del_contact('santhosh')
+    result = cb.del_contact("santhosh")
     assert result is False
     assert len(cb.contacts) == 0
 
+
 def test_search_case_insensitivity():
-    cb=ContactBook()
-    cb.add_contact('Santhosh',123455677,'santhosh@gmail.com')
-    assert cb.search_contact('santhosh') is not None
+    cb = ContactBook()
+    cb.add_contact("Santhosh", 123455677, "santhosh@gmail.com")
+    assert cb.search_contact("santhosh") is not None
+
 
 def test_save_and_load_file(tmp_path):
-    cb=ContactBook()
-    cb.add_contact('Lokesh','9989370804','lokesh@gmail.com')
-    test_file=tmp_path / 'test.json'
+    cb = ContactBook()
+    cb.add_contact("Lokesh", "9989370804", "lokesh@gmail.com")
+    test_file = tmp_path / "test.json"
     cb.save_to_file(test_file)
 
-    cb2=ContactBook()
+    cb2 = ContactBook()
     cb.load_from_file(test_file)
-    assert len(cb.contacts)==1
-    assert cb.contacts[0].name.lower()=='lokesh'
+    assert len(cb.contacts) == 1
+    assert cb.contacts[0].name.lower() == "lokesh"
