@@ -28,7 +28,7 @@ class ContactBook:
 
     def search_contact(self, name):
         for contact in self.contacts:
-            if contact.name.lower() == name:
+            if contact.name.lower() == name.lower():
                 return contact
         return None
 
@@ -44,17 +44,22 @@ class ContactBook:
         try:
             with open(filename, "w") as f:
                 json.dump(data, f, indent=2)
+            return True
         except IOError:
-            return "Error occured"
+           print("Error occured")
+        return False
 
     def load_from_file(self, filename: str = "contactbook.json"):
-        filepath = Path(filename)
+        if not Path(filename).exists():
+            self.contacts=[]
+            return
         try:
-            with open(filepath, "r") as f:
+            with open(filename, "r") as f:
                 data = json.load(f)
             self.contacts = [Contact(**item) for item in data]
         except (json.JSONDecodeError, IOError):
-            return []
+            self.contacts=[]
+
 
 
 if __name__ == "__main__":
