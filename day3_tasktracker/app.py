@@ -41,13 +41,15 @@ if __name__=='__main__':
                 print(f'Task {idx} is not the tasks')
 
         elif command==4:
-            sort_by=int(input("Do you want to sort by 1.priority or 2.due_date (default :'priority') : "))
-            if sort_by not in [1,2]:
+            sort_by=input("Do you want to sort by 1.priority or 2.due_date (default :'priority') : ")
+            if sort_by=='':
+                tt.list_tasks(sort_by)
+            elif int(sort_by) not in [1,2]:
                 print("Enter only 1 or 2 ")
                 continue
-            if sort_by==2:
+            elif sort_by==2:
                 sort_by='due_date'
-            tt.list_tasks(sort_by)
+                tt.list_tasks(sort_by)
 
         elif command==5:
             print("Thanks for visiting ")

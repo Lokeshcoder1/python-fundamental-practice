@@ -35,18 +35,24 @@ class TaskTracker:
         return True
 
     def remove_task(self,idx):
-        if idx-1 <= len(self.tasks):
-            self.tasks.pop(idx-1)
-            return True
-        return False
+        if len(self.tasks) == 0:
+            return False
+        if idx-1 <0 or idx-1 > len(self.tasks):
+            return False
+        self.tasks.pop(idx-1)
+        return True
+
 
     def mark_done(self,idx):
+        if len(self.tasks) ==0:
+            return False
+        if idx-1 <0 or idx-1 > len(self.tasks):
+            return False
         self.tasks[idx-1].done=True
         return True
 
     def list_tasks(self,sort_by='priority'):
-
-        if sort_by=='priority':
+        if sort_by=='priority'or '':
             self.sort_by_priority()
         elif sort_by=='due_date':
             self.sort_by_duedate()
@@ -58,11 +64,8 @@ class TaskTracker:
         priority_order={Priority.HIGH:0,Priority.MEDIUM:1,Priority.LOW:2}
         self.tasks=sorted(self.tasks,key=lambda t: priority_order[t.priority])
 
-
     def sort_by_duedate(self):
         self.tasks=sorted(self.tasks,key=lambda t:t.due_date)
-
-
 
     def save_to_file(self,filename:str='tasks.json'):
         data=[]
