@@ -30,7 +30,7 @@ def test_mark_done():
 def test_del_task():
     delete=client.post("/tasks",json={'title':'delete','description':'delete desc','priority':'low','due_date':'2026-05-19'})
     task_id=delete.json()['id']
-    delete=client.put(f"/tasks/{task_id}")
+    delete=client.delete(f"/tasks/{task_id}")
     assert delete.status_code==200
     get = client.get("/tasks")
     assert not any(t['id']==task_id for t in get.json())

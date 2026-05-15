@@ -29,6 +29,7 @@ class Task:
             'description':self.description,
             'priority':self.priority.value,
             'due_date':self.due_date,
+            'done':self.done,
             'created_at':self.created_at
         }
 
@@ -114,8 +115,11 @@ class TaskTracker:
                         due_date=item['due_date']
                     )
                     self.tasks.append(task)
-        except(json.JSONDecodeError,IOError):
-            self.tasks=[]
+
+            self._next_id = max([t.id for t in self.tasks], default=0) + 1
+        except (json.JSONDecodeError, IOError):
+            self.tasks = []
+            self._next_id = 1
 
 
 
