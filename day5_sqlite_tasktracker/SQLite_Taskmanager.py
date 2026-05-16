@@ -1,10 +1,10 @@
 import sqlite3
-import json
 from typing import List
 from datetime import datetime
 from dataclasses import dataclass
-from pathlib import Path
 from enum import Enum
+import os
+from logger import set_logger
 
 class Priority(Enum):
     HIGH='high'
@@ -37,7 +37,10 @@ class Task:
 
 class TaskTracker:
     def __init__(self):
-        self.conn=sqlite3.connect("Tasks.db",check_same_thread=False)
+        self.logger=set_logger("TaskTracker")
+        db_path=os.getenv('DATABASE_PATH','Tasks.db')
+        self.logger.info(f"Database is creating at {db_path}")
+        self.conn=sqlite3.connect(db_path,check_same_thread=False)
         self.cursor=self.conn.cursor()
         self.cursor.execute("""
         CREATE TABLE  IF NOT EXISTS tasks(
@@ -53,7 +56,8 @@ class TaskTracker:
     def add_task(self, title, description, priority_str, due_date):
         try:
             priority = Priority(priority_str.lower())
-        except ValueError:
+        except ValueError as e:
+            self.logger.error(f"validation error {e}")
             raise ValueError(f"Invalid priority: {priority_str}. Use high/medium/low.")
         self.cursor.execute("""INSERT INTO tasks
         (title, description, priority, due_date, done, created_at) values(?,?,?,?,?,?) """,
@@ -61,22 +65,27 @@ class TaskTracker:
         self.conn.commit()
 
         new_id=self.cursor.lastrowid
+        self.logger.info(f'Task added with id: {new_id}')
         return new_id
 
     def remove_task(self,task_id:int):
         try:
-            self.cursor.execute("DELETE  FROM  tasks WHERE id ==(?)",(task_id,))
+            self.cursor.execute("DELETE  FROM  tasks WHERE id = (?)",(task_id,))
             self.conn.commit()
+            self.logger.info(f"Task removed with id {task_id}")
             return self.cursor.rowcount>0
-        except sqlite3.Error:
+        except sqlite3.Error as e:
+            self.logger.error(f"validation error {e}")
             return False
 
     def mark_done(self,task_id:int):
         try:
             self.cursor.execute("UPDATE tasks SET done=1 WHERE id ==(?)",(task_id,))
             self.conn.commit()
+            self.logger.info(f"Task marked done with id {task_id}")
             return self.cursor.rowcount >0
-        except sqlite3.Error:
+        except sqlite3.Error as e:
+            self.logger.error(f"validation error {e}")
             return False
 
 
