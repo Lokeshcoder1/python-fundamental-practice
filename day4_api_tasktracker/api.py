@@ -21,7 +21,6 @@ def get_task():
 def create_task(task_data : TaskCreate):
     try:
         task=tracker.add_task(
-            id=tracker._next_id,
             title=task_data.title,
             description=task_data.description,
             priority_str=task_data.priority,
@@ -35,26 +34,15 @@ def create_task(task_data : TaskCreate):
 
 @app.put('/tasks/{task_id}/done')
 def mark_task_done(task_id:int):
-    for task in tracker.tasks:
-        if task.id==task_id:
-            task.done=True
-            tracker.save_to_file()
-            return {f"'message':Task id {task_id} is marked done"}
+    if tracker.mark_done(task_id):
+        tracker.save_to_file()
+        return {f"'message':Task id {task_id} is marked done"}
     raise HTTPException(status_code=404,detail="Task Not Found")
 
 
 @app.delete("/tasks/{task_id}")
 def delete_task(task_id: int):
-    print(f"DELETE request received for task_id={task_id} (type: {type(task_id)})")
-    print(f"Current task IDs in memory: {[task.id for task in tracker.tasks]}")
-
-    for i, task in enumerate(tracker.tasks):
-        if task.id == task_id:
-            print(f"Found matching task at index {i}. Deleting...")
-            del tracker.tasks[i]
-            tracker.save_to_file()
-            print(f"After deletion, task IDs: {[task.id for task in tracker.tasks]}")
-            return {"message": f"Task {task_id} deleted successfully"}
-
-    print("No task found with that ID")
+    if tracker.remove_task(task_id):
+        tracker.save_to_file()
+        return {f"'message':Task id {task_id} is removed successfully"}
     raise HTTPException(status_code=404, detail="Task Not Found")

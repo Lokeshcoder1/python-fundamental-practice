@@ -38,7 +38,7 @@ class TaskTracker:
         self.tasks=[]
         self._next_id=1
 
-    def add_task(self,id, title, description, priority_str, due_date):
+    def add_task(self, title, description, priority_str, due_date):
         try:
             priority = Priority(priority_str.lower())
         except ValueError:
@@ -53,25 +53,25 @@ class TaskTracker:
         self._next_id+=1
 
 
-    def remove_task(self,idx):
-        if len(self.tasks) == 0:
-            return False
-        if idx-1 <0 or idx-1 > len(self.tasks):
-            return False
-        self.tasks.pop(idx-1)
-        return True
+    def remove_task(self,task_id):
+        for i,task in enumerate(self.tasks):
+            if task.id==task_id:
+                self.tasks.pop(i)
+                return True
+        return False
 
 
-    def mark_done(self,idx):
-        if len(self.tasks) ==0:
-            return False
-        if idx-1 <0 or idx-1 > len(self.tasks):
-            return False
-        self.tasks[idx-1].done=True
-        return True
+
+    def mark_done(self,task_id):
+        for i,task in enumerate(self.tasks):
+            if task.id==task_id:
+                self.tasks[i].done=True
+                return True
+        return False
+
 
     def list_tasks(self,sort_by='priority'):
-        if sort_by=='priority'or '':
+        if sort_by=='priority':
             self.sort_by_priority()
         elif sort_by=='due_date':
             self.sort_by_duedate()
@@ -91,9 +91,9 @@ class TaskTracker:
         try:
             with open(filename,'w') as f:
                 json.dump(data,f,indent=2)
-                return
+                return True
         except IOError:
-            return []
+            return False
 
     def load_from_file(self,filename:str='tasks.json'):
 
@@ -115,11 +115,13 @@ class TaskTracker:
                         due_date=item['due_date']
                     )
                     self.tasks.append(task)
-
-            self._next_id = max([t.id for t in self.tasks], default=0) + 1
+                self._next_id = max([t.id for t in self.tasks], default=0) + 1
+            return True
         except (json.JSONDecodeError, IOError):
             self.tasks = []
             self._next_id = 1
+            return False
+
 
 
 
